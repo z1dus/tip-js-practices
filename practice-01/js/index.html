@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Контрольная работа №1 - Задание 4</title>
+    <style>
+        /* Базовые стили для современной и аккуратной разметки */
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Arial, sans-serif;
+            background-color: #f0f2f5;
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+        
+        /* Карточка приложения */
+        .app-container {
+            background: #ffffff;
+            padding: 28px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+            width: 100%;
+            max-width: 440px;
+            box-sizing: border-box;
+        }
+        
+        /* Заголовок */
+        h3 {
+            margin: 0 0 16px 0;
+            color: #1a202c;
+            font-size: 22px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+        
+        /* Красивый бейдж активного фильтра */
+        .filter-badge {
+            display: inline-flex;
+            align-items: center;
+            background: #e0f2fe;
+            color: #0369a1;
+            padding: 6px 14px;
+            border-radius: 99px;
+            font-size: 13px;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+        
+        /* Блок сводки статистики (Задание 1) */
+        .summary-box {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            font-size: 14px;
+            color: #475569;
+            line-height: 1.6;
+        }
+        
+        .summary-box strong {
+            color: #0f172a;
+            font-size: 15px;
+            display: inline-block;
+            margin-bottom: 6px;
+        }
+        
+        /* Список задач */
+        .task-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        /* Карточка отдельной задачи */
+        .task-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px 16px;
+            background: #ffffff;
+            border-radius: 10px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.01);
+            transition: all 0.2s ease;
+        }
+        
+        /* Небольшой интерактивный эффект при наведении */
+        .task-item:hover {
+            border-color: #cbd5e1;
+            background: #f8fafc;
+        }
+        
+        .task-item.hidden {
+            display: none;
+        }
+        
+        /* Кастомный круглый и аккуратный чекбокс */
+        .task-checkbox {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: #3498db;
+            border-radius: 6px;
+        }
+        
+        /* Текст задачи */
+        .task-title {
+            font-size: 15px;
+            color: #334155;
+        }
+        
+        .task-title strong {
+            color: #64748b;
+            font-weight: 600;
+            margin-right: 4px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <h3>Менеджер задач</h3>
+    <div class="filter-badge">Активный фильтр: В работе</div>
+    
+    <!-- Блок сводки из Задания 1 и 4 -->
+    <div class="summary-box" id="summary-box">
+        <!-- Сюда JavaScript подставит нужные цифры -->
+    </div>
+
+    <!-- Список задач из Задания 2 и 4 -->
+    <div class="task-list" id="task-list">
+        <!-- Сюда JavaScript выведет задачи -->
+    </div>
+</div>
+
+<script>
+    // Исходный общий набор demoTasks по условию
+    let currentTasks = [
+        { id: 1, title: "Задача 1", completed: true },
+        { id: 4, title: "Задача 4", completed: false },
+        { id: 7, title: "Задача 7", completed: false },
+        { id: 10, title: "Задача 10", completed: true }
+    ];
+
+    const taskListElement = document.getElementById('task-list');
+    const summaryBoxElement = document.getElementById('summary-box');
+
+    // Функция изменения статуса задачи (из Задания 3)
+    function setTaskCompleted(tasks, id, completed) {
+        if (!Number.isSafeInteger(id) || id <= 0) return { ok: false, error: "Неверный формат ID" };
+        if (typeof completed !== "boolean") return { ok: false, error: "Неверный статус" };
+        
+        const taskExists = tasks.some(task => task.id === id);
+        if (!taskExists) return { ok: false, error: "Задача не найдена" };
+
+        const newTasks = tasks.map(task => {
+            if (task.id === id) {
+                return { ...task, completed: completed };
+            }
+            return task;
+        });
+        return { ok: true, tasks: newTasks };
+    }
+
+    // Функция обновления сводки (логика из Задания 1)
+    function updateProgressSummary(tasks) {
+        const totalTasks = tasks.length;
+        const completedTasks = tasks.filter(t => t.completed).length;
+        const remaining = totalTasks - completedTasks;
+        const percentage = ((completedTasks / totalTasks) * 100).toFixed(1);
+        summaryBoxElement.innerHTML = `
+            <strong>Статистика:</strong><br>
+            Всего задач: ${totalTasks} | Выполнено: ${completedTasks}<br>
+            Осталось: ${remaining} | Прогресс: ${percentage}%
+        `;
+    }
+
+    // Функция отрисовки интерфейса с фильтром "В работе" (Задание 2 и 4)
+    function renderTaskList(tasks) {
+        taskListElement.innerHTML = '';
+        
+        tasks.forEach(task => {
+            // По условию отображаем только НЕВЫПОЛНЕННЫЕ задачи (фильтр «В работе»)
+            // Но задачу id=4 мы тоже временно отрендерим, чтобы была видна работа переключателя
+            if (task.completed && task.id !== 4) return; 
+
+            const taskItem = document.createElement('div');
+            taskItem.className = 'task-item';
+            taskItem.dataset.id = task.id;
+
+            // Если задача выполнена, она должна исчезнуть по логике фильтра, 
+            // но мы добавим класс hidden, если это потребуется, либо она пропадет при перерисовке
+            if (task.id === 4 && task.completed) {
+                taskItem.classList.add('hidden');
+                return; 
+            }
+
+            taskItem.innerHTML = `
+                <input type="checkbox" class="task-checkbox" ${task.completed ? 'checked' : ''}>
+                <span class="task-title"><strong>[ID ${task.id}]</strong> ${task.title}</span>
+            `;
+            taskListElement.appendChild(taskItem);
+        });
+    }
+
+    // --- Обработчик переключения статуса (код из Задания 4) ---
+    taskListElement.addEventListener('change', (event) => {
+        if (event.target.classList.contains('task-checkbox')) {
+            const taskItem = event.target.closest('.task-item');
+            const taskId = parseInt(taskItem.dataset.id, 10);
+            const isCompleted = event.target.checked;
+            
+            // Меняем статус через нашу функцию
+            const result = setTaskCompleted(currentTasks, taskId, isCompleted);
+            
+            if (result.ok) {
+                currentTasks = result.tasks; // Сохраняем новые данные
+                
+                // Перерисовываем интерфейс
+                renderTaskList(currentTasks); 
+                updateProgressSummary(currentTasks); 
+            }
+        }
+    });
+
+    // Первичный запуск при открытии страницы
+    renderTaskList(currentTasks);
+    updateProgressSummary(currentTasks);
+</script>
+
+</body>
+</html>
